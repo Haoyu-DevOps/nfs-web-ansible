@@ -1,0 +1,31 @@
+---
+- name: Install NFS server
+  yum:
+    name: nfs-utils
+    state: present
+
+- name: Start and enable NFS server
+  service:
+    name: nfs-server
+    state: started
+    enabled: yes
+
+- name: Create shared directory
+  file:
+    path: /srv/nfs
+    state: directory
+    mode: '0755'
+
+- name: Configure NFS exports
+  template:
+    src: exports.j2
+    dest: /etc/exports
+  notify:
+    - restart nfs
+
+- name: Open firewall for NFS
+  firewalld:
+    service: nfs
+    permanent: yes
+    state: enabled
+    immediate: yes

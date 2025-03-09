@@ -1,0 +1,7 @@
+[web]
+172.16.1.7
+#ansible_user=root ansible_password=1 ansible_port=22
+
+[nfs]
+172.16.1.31
+

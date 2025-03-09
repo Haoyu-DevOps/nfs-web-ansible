@@ -1,0 +1,48 @@
+---
+- name: Install Nginx
+  yum:
+    name: nginx
+    state: present
+
+- name: Start and enable Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Create mount directory for NFS
+  file:
+    path: /mnt/nfs
+    state: directory
+
+- name: Mount NFS shared directory
+  mount:
+    path: /mnt/nfs
+    src: "{{ nfs_server_ip }}:/srv/nfs"
+    fstype: nfs
+    state: mounted
+    opts: rw,sync
+
+- name: Configure Nginx to serve files from NFS mount
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+
+- name: Check Nginx configuration for errors
+  command: nginx -t
+  register: nginx_test
+  failed_when: nginx_test.rc != 0
+  changed_when: false
+
+- name: Reload Nginx to apply configuration
+  service:
+    name: nginx
+    state: reloaded
+
+- name: Open firewall for HTTP
+  firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+    immediate: yes
+

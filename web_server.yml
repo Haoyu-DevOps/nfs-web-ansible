@@ -1,0 +1,40 @@
+---
+- name: Configure Web server
+  hosts: web
+  become: yes
+  roles:
+    - web_server
+  tasks:
+    - name: Install Nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Create mount directory for NFS
+      file:
+        path: /mnt/nfs
+        state: directory
+
+    - name: Mount NFS shared directory
+      mount:
+        path: /mnt/nfs
+        src: "172.16.1.31:/srv/nfs"
+        fstype: nfs
+        state: mounted
+
+    - name: Configure Nginx to serve files from NFS mount
+      lineinfile:
+        path: /etc/nginx/nginx.conf
+        regexp: 'root\s*/var/www/html;'
+        line: 'root /mnt/nfs;'
+
+    - name: Reload Nginx to apply configuration
+      service:
+        name: nginx
+        state: reloaded

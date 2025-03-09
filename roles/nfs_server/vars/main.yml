@@ -1,0 +1,3 @@
+# 默认的 NFS 配置
+# nfs_shared_dir: "/srv/nfs"
+# nfs_exports_line: "/srv/nfs *(rw,sync,no_root_squash)"
